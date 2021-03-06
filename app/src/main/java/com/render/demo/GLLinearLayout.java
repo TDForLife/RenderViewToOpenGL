@@ -1,11 +1,9 @@
 package com.render.demo;
 
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.SurfaceTexture;
-import android.util.Log;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.ViewTreeObserver;
@@ -16,9 +14,6 @@ public class GLLinearLayout extends LinearLayout implements IRenderView {
 
     private Surface mSurface;
 
-    private SurfaceTexture mSurfaceTexture;
-
-
     @Override
     public void configSurface(Surface surface) {
         this.mSurface = surface;
@@ -26,8 +21,7 @@ public class GLLinearLayout extends LinearLayout implements IRenderView {
 
     @Override
     public void configSurfaceTexture(SurfaceTexture surfaceTexture) {
-        this.mSurfaceTexture = surfaceTexture;
-        mSurface = new Surface(mSurfaceTexture);
+        mSurface = new Surface(surfaceTexture);
     }
 
     public GLLinearLayout(Context context) {

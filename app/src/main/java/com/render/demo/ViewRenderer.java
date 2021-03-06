@@ -38,10 +38,6 @@ class ViewRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl) {
 
-//        synchronized (this) {
-//            surfaceTexture.updateTexImage();
-//        }
-
         surfaceTexture.updateTexImage();
 
         GLES20.glClearColor(0.0f, 0.0f, 1.0f, 1.0f);

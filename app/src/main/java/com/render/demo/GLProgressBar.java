@@ -14,9 +14,6 @@ import android.widget.ProgressBar;
 public class GLProgressBar extends ProgressBar implements IRenderView {
 
 	private Surface mSurface;
-	
-	private SurfaceTexture mSurfaceTexture;
-
 
 	@Override
 	public void configSurface(Surface surface) {
@@ -25,8 +22,7 @@ public class GLProgressBar extends ProgressBar implements IRenderView {
 
 	@Override
 	public void configSurfaceTexture(SurfaceTexture surfaceTexture) {
-		this.mSurfaceTexture = surfaceTexture;
-		mSurface = new Surface(mSurfaceTexture);
+		mSurface = new Surface(surfaceTexture);
 	}
 
 	public GLProgressBar(Context context) {
