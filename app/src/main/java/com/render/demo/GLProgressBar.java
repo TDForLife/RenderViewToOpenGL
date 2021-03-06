@@ -3,6 +3,7 @@ package com.render.demo;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.PorterDuff;
 import android.graphics.SurfaceTexture;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -10,7 +11,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
-public class GLProgressBar extends ProgressBar implements IRendedView{
+public class GLProgressBar extends ProgressBar implements IRenderView {
 
 	private Surface mSurface;
 	
@@ -25,6 +26,7 @@ public class GLProgressBar extends ProgressBar implements IRendedView{
 	@Override
 	public void configSurfaceTexture(SurfaceTexture surfaceTexture) {
 		this.mSurfaceTexture = surfaceTexture;
+		mSurface = new Surface(mSurfaceTexture);
 	}
 
 	public GLProgressBar(Context context) {
@@ -38,6 +40,7 @@ public class GLProgressBar extends ProgressBar implements IRendedView{
 			// Requires a try/catch for .lockCanvas( null )
 			try {
 				final Canvas surfaceCanvas = mSurface.lockCanvas(null); // Android
+				surfaceCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
 				// canvas
 				// from
 				// surface
@@ -49,14 +52,16 @@ public class GLProgressBar extends ProgressBar implements IRendedView{
 				excp.printStackTrace();
 			}
 		}
-		
-		if (mSurface != null) {
-			mSurface.release();
-			mSurface = null;
-			mSurface = new Surface(mSurfaceTexture);
-		}
-		
+
+//		if (mSurface != null) {
+//			mSurface.release();
+//			mSurface = null;
+//			mSurface = new Surface(mSurfaceTexture);
+//		}
+//		canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+
 		// original view
-		super.onDraw( canvas ); // <- Uncomment this if you want to show the original view
+		// <- Uncomment this if you want to show the original view
+		super.onDraw( canvas );
 	}
 }

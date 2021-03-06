@@ -3,7 +3,7 @@ package com.render.demo;
 import android.graphics.SurfaceTexture;
 import android.view.Surface;
 
-public interface IRendedView {
+public interface IRenderView {
 
     void configSurface(Surface surface);
 
