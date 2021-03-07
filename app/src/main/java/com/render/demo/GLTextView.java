@@ -2,12 +2,11 @@ package com.render.demo;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.SurfaceTexture;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 public class GLTextView extends TextView implements IRenderView {
@@ -26,7 +25,6 @@ public class GLTextView extends TextView implements IRenderView {
 
     public GLTextView(Context context) {
         super(context);
-        setLayoutParams(new LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 400));
     }
 
     @Override
@@ -44,7 +42,7 @@ public class GLTextView extends TextView implements IRenderView {
         }
 
         // Uncomment this if you want to show the original view
-        // canvas.drawColor(Color.YELLOW);
+        canvas.drawColor(Color.YELLOW);
         super.onDraw(canvas);
     }
 

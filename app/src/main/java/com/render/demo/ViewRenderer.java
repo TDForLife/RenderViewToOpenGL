@@ -12,27 +12,25 @@ import javax.microedition.khronos.opengles.GL10;
 
 class ViewRenderer implements GLSurfaceView.Renderer {
 
-    int glSurfaceTex;
     private final int GL_TEXTURE_EXTERNAL_OES = 0x8D65;
-    DirectDrawer mDirectDrawer;
 
     // Fixed values
-    private int TEXTURE_WIDTH;
-    private int TEXTURE_HEIGHT;
+    private int textureWidth;
+    private int textureHeight;
 
-    Context context;
-
+    private Context context;
     private IRenderView renderView;
-
+    private int glSurfaceTex;
     private SurfaceTexture surfaceTexture = null;
-
-    private Surface surface;
+    private DirectDrawer directDrawer;
 
     public ViewRenderer(Context context, IRenderView renderView, Display mDisplay) {
         this.context = context;
         this.renderView = renderView;
-        TEXTURE_WIDTH = mDisplay.getWidth();
-        TEXTURE_HEIGHT = mDisplay.getHeight();
+        textureWidth = mDisplay.getWidth();
+        textureHeight = mDisplay.getHeight();
+//        textureWidth = 277;
+//        textureHeight = 57;
     }
 
     @Override
@@ -47,22 +45,20 @@ class ViewRenderer implements GLSurfaceView.Renderer {
 
         float[] mtx = new float[16];
         surfaceTexture.getTransformMatrix(mtx);
-        mDirectDrawer.draw(mtx);
+        directDrawer.draw(mtx);
     }
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        surface = null;
         surfaceTexture = null;
-
-        glSurfaceTex = Engine_CreateSurfaceTexture(TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        glSurfaceTex = engineCreateSurfaceTexture(textureWidth, textureHeight);
         if (glSurfaceTex > 0) {
             surfaceTexture = new SurfaceTexture(glSurfaceTex);
-            surfaceTexture.setDefaultBufferSize(TEXTURE_WIDTH, TEXTURE_HEIGHT);
-            surface = new Surface(surfaceTexture);
+            surfaceTexture.setDefaultBufferSize(textureWidth, textureHeight);
+            Surface surface = new Surface(surfaceTexture);
             renderView.configSurface(surface);
             renderView.configSurfaceTexture(surfaceTexture);
-            mDirectDrawer = new DirectDrawer(glSurfaceTex);
+            directDrawer = new DirectDrawer(glSurfaceTex);
         }
     }
 
@@ -71,7 +67,7 @@ class ViewRenderer implements GLSurfaceView.Renderer {
      * Create our texture. This has to be done each time the surface is
      * created.
      */
-    int Engine_CreateSurfaceTexture(int width, int height) {
+    int engineCreateSurfaceTexture(int width, int height) {
 
         int[] textures = new int[1];
         GLES20.glGenTextures(1, textures, 0);
@@ -82,11 +78,11 @@ class ViewRenderer implements GLSurfaceView.Renderer {
             GLES20.glBindTexture(GL_TEXTURE_EXTERNAL_OES, glSurfaceTex);
 
             // Notice the use of GL_TEXTURE_2D for texture creation
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB, width, height, 0, GLES20.GL_RGB, GLES20.GL_UNSIGNED_BYTE, null);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB, width, height, 0,
+                    GLES20.GL_RGB, GLES20.GL_UNSIGNED_BYTE, null);
 
             GLES20.glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
             GLES20.glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
-
             GLES20.glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
             GLES20.glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
         }

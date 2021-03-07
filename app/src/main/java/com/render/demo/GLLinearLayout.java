@@ -26,10 +26,9 @@ public class GLLinearLayout extends LinearLayout implements IRenderView {
 
     public GLLinearLayout(Context context) {
         super(context);
-        setLayoutParams(new LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 400));
+        setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
         addOnPreDrawListener();
     }
-
 
     private void addOnPreDrawListener() {
         final ViewTreeObserver mObserver = getViewTreeObserver();

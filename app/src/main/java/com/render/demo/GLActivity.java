@@ -12,70 +12,77 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 
 public class GLActivity extends Activity {
+
+    private static final String TAG = "activity";
 
     private FrameLayout root;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Set the activity to display the glSurfaceView
         setContentView(R.layout.activity_main);
-        root = findViewById(R.id.root);
-        addGLViewGroup();
+        root = findViewById(R.id.container_layout);
+//        addTextView();
+//        addGLViewGroup();
+        addProgressView();
     }
 
 
     private void addProgressView() {
 
-        Display mDisplay = getWindowManager().getDefaultDisplay();
+        Display display = getWindowManager().getDefaultDisplay();
         final GLProgressBar glProgressBar = new GLProgressBar(this);
 
-        ViewRenderer renderer = new ViewRenderer(getApplicationContext(), glProgressBar, mDisplay);
+        ViewRenderer renderer = new ViewRenderer(getApplicationContext(), glProgressBar, display);
         GLSurfaceView glSurfaceView = new GLSurfaceView(getApplicationContext());
-        // Setup the surface view for drawing to
-
         glSurfaceView.setEGLContextClientVersion(2);
         glSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         glSurfaceView.setRenderer(renderer);
-        //glSurfaceView.setZOrderOnTop(true);
-        // Add our WebView to the Android View hierarchy
-        glSurfaceView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-        root.addView(glSurfaceView);
+
+        final FrameLayout.LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        glSurfaceView.setLayoutParams(layoutParams);
+        root.addView(glSurfaceView, layoutParams);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                root.addView(glProgressBar);
+                root.addView(glProgressBar, layoutParams);
             }
         }, 100);
-
-        //addContentView(glProgressBar, new ViewGroup.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
     }
 
     private void addTextView() {
         Display mDisplay = getWindowManager().getDefaultDisplay();
         final GLTextView glTextView = new GLTextView(this);
-        glTextView.setText("Hello world");
+        glTextView.setText("Hello TextView");
         glTextView.setTextColor(Color.WHITE);
 
         ViewRenderer renderer = new ViewRenderer(getApplicationContext(), glTextView, mDisplay);
-        final GLSurfaceView glSurfaceView = new GLSurfaceView(getApplicationContext());
-        // Setup the surface view for drawing to
 
+        final GLSurfaceView glSurfaceView = new GLSurfaceView(getApplicationContext());
         glSurfaceView.setEGLContextClientVersion(2);
         glSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         glSurfaceView.setRenderer(renderer);
-        //glSurfaceView.setZOrderOnTop(true);
-        // Add our WebView to the Android View hierarchy
-        glSurfaceView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-        root.addView(glSurfaceView);
+
+        final FrameLayout.LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+
+        root.addView(glSurfaceView, layoutParams);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                root.addView(glTextView);
+                root.addView(glTextView, layoutParams);
             }
         }, 100);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                startPopsAnimTrans(glTextView);
+                // glTextView.setLeft(100);
+                // glTextView.postInvalidate();
+            }
+        }, 2000);
     }
 
     private void addGLViewGroup() {
@@ -94,26 +101,59 @@ public class GLActivity extends Activity {
         glSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         glSurfaceView.setRenderer(renderer);
 
-        // glSurfaceView.setZOrderOnTop(true);
-        // Add our WebView to the Android View hierarchy
-        glSurfaceView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-        root.addView(glSurfaceView);
-        // Add view
+        final FrameLayout.LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        root.addView(glSurfaceView, layoutParams);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
                 root.addView(glLinearLayout, layoutParams);
             }
         }, 100);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-//                glTextView.setLeft(100);
                 startPopsAnimTrans(glLinearLayout);
-                glLinearLayout.postInvalidate();
+                // glTextView.setLeft(100);
+                // glLinearLayout.postInvalidate();
             }
         }, 2000);
+    }
+
+
+    // 属性动画-平移
+    private void startPopsAnimTrans(final View view) {
+        float[] x = {60f};
+        ObjectAnimator objectAnimatorX = ObjectAnimator.ofFloat(view, "translationX", x);
+        objectAnimatorX.setDuration(2000);
+        objectAnimatorX.start();
+        objectAnimatorX.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                Log.d(TAG, "onAnimationUpdate -- " + view.getTranslationX());
+
+            }
+        });
+        objectAnimatorX.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                Log.d(TAG, "onAnimationEnd -- " + view.getTranslationX());
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
     }
 
 
@@ -130,42 +170,6 @@ public class GLActivity extends Activity {
                 startPopsAnimTrans(sView);
             }
         }, 3000);
-    }
-
-    // 属性动画-平移
-    private void startPopsAnimTrans(final View view) {
-        float[] x = {60f};
-        ObjectAnimator objectAnimatorX = ObjectAnimator.ofFloat(view, "translationX", x);
-        objectAnimatorX.setDuration(2000);
-        objectAnimatorX.start();
-        objectAnimatorX.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                Log.d("zwt", "onAnimationUpdate -- " + view.getTranslationX());
-
-            }
-        });
-        objectAnimatorX.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                Log.d("zwt", "onAnimationEnd -- " + view.getTranslationX());
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
     }
 
 }
