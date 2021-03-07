@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.SurfaceTexture;
+import android.util.AttributeSet;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.ViewGroup.LayoutParams;
@@ -15,6 +16,19 @@ public class GLProgressBar extends ProgressBar implements IRenderView {
 
 	private Surface mSurface;
 
+	public GLProgressBar(Context context) {
+		super(context);
+		setLayoutParams(new LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 400));
+	}
+
+	public GLProgressBar(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
+
+	public GLProgressBar(Context context, AttributeSet attrs, int defStyleAttr) {
+		super(context, attrs, defStyleAttr);
+	}
+
 	@Override
 	public void configSurface(Surface surface) {
 		this.mSurface = surface;
@@ -23,11 +37,6 @@ public class GLProgressBar extends ProgressBar implements IRenderView {
 	@Override
 	public void configSurfaceTexture(SurfaceTexture surfaceTexture) {
 		mSurface = new Surface(surfaceTexture);
-	}
-
-	public GLProgressBar(Context context) {
-		super(context);
-		setLayoutParams(new LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 400));
 	}
 
 	@Override

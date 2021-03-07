@@ -18,61 +18,68 @@ public class GLActivity extends Activity {
 
     private static final String TAG = "activity";
 
-    private FrameLayout root;
+    private FrameLayout mContainer;
+    private GLSurfaceView mDrawSurfaceView;
+    private Display mDisplay;
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        root = findViewById(R.id.container_layout);
+        mContainer = findViewById(R.id.container_layout);
+        mDrawSurfaceView = findViewById(R.id.draw_surface_view);
+        mDisplay = getWindowManager().getDefaultDisplay();
+        mHandler = new Handler();
 //        addTextView();
 //        addGLViewGroup();
-        addProgressView();
+//        addProgressView();
+        activeFixedTextView();
     }
 
+    private void activeFixedTextView() {
+        final GLTextView fixedTextView = findViewById(R.id.fixed_gl_tv);
+        final ViewRenderer renderer = new ViewRenderer(getApplicationContext(), fixedTextView, mDisplay);
 
-    private void addProgressView() {
+        mDrawSurfaceView.setVisibility(View.VISIBLE);
+        mDrawSurfaceView.setEGLContextClientVersion(2);
+        mDrawSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        mDrawSurfaceView.setRenderer(renderer);
+        // 如果是 WHEN_DIRTY 的绘制模式，那么 SurfaceView draw 的时候并没有 fixedTextView 的图像数据，而 draw 又只执行一次
+        // 这便导致 SurfaceView 画不出内容，所以 SurfaceView 要有内容要两个步骤，一是目标视图已经有数据了，二是 SurfaceView 在
+        // 一的前提下会再触发 draw 方法，即 GLSurfaceView 的 onDrawFrame
+        // mDrawSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
-        Display display = getWindowManager().getDefaultDisplay();
-        final GLProgressBar glProgressBar = new GLProgressBar(this);
+//        fixedTextView.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                renderer.transformWorldCoords(fixedTextView);
+//            }
+//        });
 
-        ViewRenderer renderer = new ViewRenderer(getApplicationContext(), glProgressBar, display);
-        GLSurfaceView glSurfaceView = new GLSurfaceView(getApplicationContext());
-        glSurfaceView.setEGLContextClientVersion(2);
-        glSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        glSurfaceView.setRenderer(renderer);
-
-        final FrameLayout.LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        glSurfaceView.setLayoutParams(layoutParams);
-        root.addView(glSurfaceView, layoutParams);
-        new Handler().postDelayed(new Runnable() {
+        mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                root.addView(glProgressBar, layoutParams);
+                fixedTextView.invalidate();
             }
-        }, 100);
+        }, 2500);
     }
 
     private void addTextView() {
-        Display mDisplay = getWindowManager().getDefaultDisplay();
         final GLTextView glTextView = new GLTextView(this);
         glTextView.setText("Hello TextView");
         glTextView.setTextColor(Color.WHITE);
 
         ViewRenderer renderer = new ViewRenderer(getApplicationContext(), glTextView, mDisplay);
+        mDrawSurfaceView.setVisibility(View.VISIBLE);
+        mDrawSurfaceView.setEGLContextClientVersion(2);
+        mDrawSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        mDrawSurfaceView.setRenderer(renderer);
 
-        final GLSurfaceView glSurfaceView = new GLSurfaceView(getApplicationContext());
-        glSurfaceView.setEGLContextClientVersion(2);
-        glSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        glSurfaceView.setRenderer(renderer);
-
-        final FrameLayout.LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-
-        root.addView(glSurfaceView, layoutParams);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                root.addView(glTextView, layoutParams);
+                mContainer.addView(glTextView, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
             }
         }, 100);
         new Handler().postDelayed(new Runnable() {
@@ -86,7 +93,6 @@ public class GLActivity extends Activity {
     }
 
     private void addGLViewGroup() {
-        Display mDisplay = getWindowManager().getDefaultDisplay();
         final GLTextView glTextView = new GLTextView(this);
         glTextView.setText("Hello GLViewGroup");
         glTextView.setTextColor(Color.WHITE);
@@ -102,11 +108,11 @@ public class GLActivity extends Activity {
         glSurfaceView.setRenderer(renderer);
 
         final FrameLayout.LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        root.addView(glSurfaceView, layoutParams);
+        mContainer.addView(glSurfaceView, layoutParams);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                root.addView(glLinearLayout, layoutParams);
+                mContainer.addView(glLinearLayout, layoutParams);
             }
         }, 100);
         new Handler().postDelayed(new Runnable() {
@@ -119,6 +125,24 @@ public class GLActivity extends Activity {
         }, 2000);
     }
 
+
+    private void addProgressView() {
+        final GLProgressBar glProgressBar = new GLProgressBar(this);
+        ViewRenderer renderer = new ViewRenderer(getApplicationContext(), glProgressBar, mDisplay);
+        mDrawSurfaceView.setVisibility(View.VISIBLE);
+        mDrawSurfaceView.setEGLContextClientVersion(2);
+        mDrawSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        mDrawSurfaceView.setRenderer(renderer);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mContainer.addView(glProgressBar, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+            }
+        }, 100);
+    }
+
+    /******************************************* 工具分界 *****************************************************/
 
     // 属性动画-平移
     private void startPopsAnimTrans(final View view) {

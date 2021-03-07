@@ -6,6 +6,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.view.Display;
 import android.view.Surface;
+import android.view.View;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -19,18 +20,18 @@ class ViewRenderer implements GLSurfaceView.Renderer {
     private int textureHeight;
 
     private Context context;
-    private IRenderView renderView;
+    private IRenderView mRenderView;
     private int glSurfaceTex;
     private SurfaceTexture surfaceTexture = null;
-    private DirectDrawer directDrawer;
+    private DirectDrawer mDirectDrawer;
 
-    public ViewRenderer(Context context, IRenderView renderView, Display mDisplay) {
+    public ViewRenderer(Context context, IRenderView mRenderView, Display mDisplay) {
         this.context = context;
-        this.renderView = renderView;
+        this.mRenderView = mRenderView;
         textureWidth = mDisplay.getWidth();
         textureHeight = mDisplay.getHeight();
-//        textureWidth = 277;
-//        textureHeight = 57;
+        // textureWidth = 277;
+        // textureHeight = 57;
     }
 
     @Override
@@ -38,6 +39,7 @@ class ViewRenderer implements GLSurfaceView.Renderer {
 
         surfaceTexture.updateTexImage();
 
+        // 你试着把 glClearColor 去掉，你会发现其实 SurfaceView 上早就有内容了，只不过被 glClearColor 给抹掉了
         GLES20.glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glEnable(GLES20.GL_BLEND);
@@ -45,7 +47,7 @@ class ViewRenderer implements GLSurfaceView.Renderer {
 
         float[] mtx = new float[16];
         surfaceTexture.getTransformMatrix(mtx);
-        directDrawer.draw(mtx);
+        mDirectDrawer.draw(mtx);
     }
 
     @Override
@@ -56,9 +58,9 @@ class ViewRenderer implements GLSurfaceView.Renderer {
             surfaceTexture = new SurfaceTexture(glSurfaceTex);
             surfaceTexture.setDefaultBufferSize(textureWidth, textureHeight);
             Surface surface = new Surface(surfaceTexture);
-            renderView.configSurface(surface);
-            renderView.configSurfaceTexture(surfaceTexture);
-            directDrawer = new DirectDrawer(glSurfaceTex);
+            mRenderView.configSurface(surface);
+            mRenderView.configSurfaceTexture(surfaceTexture);
+            mDirectDrawer = new DirectDrawer(glSurfaceTex);
         }
     }
 
@@ -92,5 +94,9 @@ class ViewRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
 
+    }
+
+    public void transformWorldCoords(View targetView) {
+        mDirectDrawer.transformWorldCoords(targetView, textureWidth, textureHeight);
     }
 }

@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.SurfaceTexture;
+import android.util.AttributeSet;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.widget.TextView;
@@ -12,6 +13,18 @@ import android.widget.TextView;
 public class GLTextView extends TextView implements IRenderView {
 
     private Surface mSurface;
+
+    public GLTextView(Context context) {
+        super(context);
+    }
+
+    public GLTextView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public GLTextView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
 
     @Override
     public void configSurface(Surface surface) {
@@ -21,10 +34,6 @@ public class GLTextView extends TextView implements IRenderView {
     @Override
     public void configSurfaceTexture(SurfaceTexture surfaceTexture) {
         mSurface = new Surface(surfaceTexture);
-    }
-
-    public GLTextView(Context context) {
-        super(context);
     }
 
     @Override

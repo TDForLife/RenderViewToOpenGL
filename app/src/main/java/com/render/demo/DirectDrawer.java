@@ -2,6 +2,8 @@ package com.render.demo;
 
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
+import android.util.Log;
+import android.view.View;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -10,117 +12,173 @@ import java.nio.ShortBuffer;
 
 public class DirectDrawer {
 
-    private final String vertexShaderCode = "attribute vec4 vPosition;"
-            + "attribute vec2 inputTextureCoordinate;"
-            + "varying vec2 textureCoordinate;" + "void main()" + "{"
-            + "gl_Position = vPosition;"
-            + "textureCoordinate = inputTextureCoordinate;" + "}";
+    private static final String TAG = "draw";
 
-    private final String fragmentShaderCode = "#extension GL_OES_EGL_image_external : require\n"
-            + "precision mediump float;"
+    private final String VERTEX_SHADER_CODE = ""
+            + "attribute vec4 vPosition;\n"
+            + "attribute vec2 inputTextureCoordinate;\n"
             + "varying vec2 textureCoordinate;\n"
-            + "uniform samplerExternalOES s_texture;\n"
-            + "void main() {"
-            + "  gl_FragColor = texture2D( s_texture, textureCoordinate );\n"
+            + "void main()" + "{\n"
+            + "     gl_Position = vPosition;\n"
+            + "     textureCoordinate = inputTextureCoordinate;\n"
             + "}";
 
-    private FloatBuffer vertexBuffer, textureVerticesBuffer;
-    private ShortBuffer drawListBuffer;
-    private final int mProgram;
-    private int mPositionHandle;
-    private int mTextureCoordHandle;
-
-    // order to draw vertices
-    private short drawOrder[] = {
-            0, 1, 2,
-            0, 2, 3
-    };
+    private final String FRAGMENT_SHADER_CODE = ""
+            + "#extension GL_OES_EGL_image_external : require\n"
+            + "precision mediump float;\n"
+            + "varying vec2 textureCoordinate;\n"
+            + "uniform samplerExternalOES s_texture;\n"
+            + "void main() {\n"
+            + "     gl_FragColor = texture2D(s_texture, textureCoordinate);\n"
+            + "}";
 
     // number of coordinates per vertex in this array
-    private static final int COORDS_PER_VERTEX = 2;
+    private final static int COORDS_PER_VERTEX = 2;
+    private final static int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per
 
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per
+//    private final static float[] WORLD_COORDS = {
+//            -1.0f, 1.0f,
+//            -1.0f, -1.0f,
+//            1.0f, -1f,
+//            1.0f, 1.0f
+//    };
 
-    private static float squareCoords[] = {
-            -1.0f, 1.0f,
-            -1.0f, -1.0f,
-            1.0f, -1f,
-            1.0f, 1.0f
+//    private final static float[] WORLD_COORDS = {
+//            -0.30555555f,0.026352288f,
+//            -0.30555555f,-0.026352288f,
+//            0.30555555f,-0.026352288f,
+//            0.30555555f,0.026352288f
+//    };
+
+    private final static float[] WORLD_COORDS = {
+            -0.5f, 0.5f,
+            -0.5f, -0.5f,
+            0.5f, -0.5f,
+            0.5f, 0.5f
     };
 
-    private static float textureVertices[] = {
+    private final static float[] TEXTURE_VERTICES = {
             0f, 0f,
             0f, 1f,
             1f, 1f,
             1f, 0f
     };
 
-    private int texture;
+    // order to draw vertices
+    private final short[] DRAW_ORDER = {
+            0, 1, 2,
+            0, 3, 2
+    };
+
+
+    private FloatBuffer mVertexBuffer;
+    private FloatBuffer mTextureVerticesBuffer;
+    private ShortBuffer mDrawListBuffer;
+    private int mProgram;
+
+    private int mPositionHandle;
+    private int mTextureCoordsHandle;
+    private int mTextureID;
 
     public DirectDrawer(int texture) {
 
-        this.texture = texture;
+        this.mTextureID = texture;
 
         // initialize vertex byte buffer for shape coordinates
-        ByteBuffer bb = ByteBuffer.allocateDirect(squareCoords.length * 4);
-        bb.order(ByteOrder.nativeOrder());
-        vertexBuffer = bb.asFloatBuffer();
-        vertexBuffer.put(squareCoords);
-        vertexBuffer.position(0);
+        mVertexBuffer = ByteBuffer.allocateDirect(WORLD_COORDS.length * 4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer();
+        mVertexBuffer.put(WORLD_COORDS);
+        mVertexBuffer.position(0);
 
         // initialize byte buffer for the draw list
-        ByteBuffer dlb = ByteBuffer.allocateDirect(drawOrder.length * 2);
-        dlb.order(ByteOrder.nativeOrder());
-        drawListBuffer = dlb.asShortBuffer();
-        drawListBuffer.put(drawOrder);
-        drawListBuffer.position(0);
+        mDrawListBuffer = ByteBuffer.allocateDirect(DRAW_ORDER.length * 2)
+                .order(ByteOrder.nativeOrder())
+                .asShortBuffer();
+        mDrawListBuffer.put(DRAW_ORDER);
+        mDrawListBuffer.position(0);
 
-        ByteBuffer bb2 = ByteBuffer.allocateDirect(textureVertices.length * 4);
-        bb2.order(ByteOrder.nativeOrder());
-        textureVerticesBuffer = bb2.asFloatBuffer();
-        textureVerticesBuffer.put(textureVertices);
-        textureVerticesBuffer.position(0);
+        mTextureVerticesBuffer = ByteBuffer.allocateDirect(TEXTURE_VERTICES.length * 4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer();
+        mTextureVerticesBuffer.put(TEXTURE_VERTICES);
+        mTextureVerticesBuffer.position(0);
 
-        int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
-
-        mProgram = GLES20.glCreateProgram(); // create empty OpenGL ES Program
-        GLES20.glAttachShader(mProgram, vertexShader); // add the vertex shader
-        // to program
-        GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment
+        int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, VERTEX_SHADER_CODE);
+        int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, FRAGMENT_SHADER_CODE);
+        // create empty OpenGL ES Program
+        mProgram = GLES20.glCreateProgram();
+        // add the vertex shader
+        GLES20.glAttachShader(mProgram, vertexShader);
+        // add the fragment shader
+        GLES20.glAttachShader(mProgram, fragmentShader);
         // shader to program
-        GLES20.glLinkProgram(mProgram); // creates OpenGL ES program executables
+        GLES20.glLinkProgram(mProgram);
     }
 
     public void draw(float[] mtx) {
+        Log.d("zwt", "draw - ");
+
         GLES20.glUseProgram(mProgram);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, texture);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mTextureID);
 
         // get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
-        // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
         // Prepare the <insert shape here> coordinate data
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,  GLES20.GL_FLOAT, false, vertexStride, vertexBuffer);
-        mTextureCoordHandle = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
-        GLES20.glEnableVertexAttribArray(mTextureCoordHandle);
-        GLES20.glVertexAttribPointer(mTextureCoordHandle, COORDS_PER_VERTEX,  GLES20.GL_FLOAT, false, vertexStride, textureVerticesBuffer);
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.length,  GLES20.GL_UNSIGNED_SHORT, drawListBuffer);
+        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+        mVertexBuffer.position(0);
+        GLES20.glEnableVertexAttribArray(mPositionHandle);
+        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, vertexStride, mVertexBuffer);
+
+        mTextureCoordsHandle = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
+        mTextureVerticesBuffer.position(0);
+        GLES20.glEnableVertexAttribArray(mTextureCoordsHandle);
+        GLES20.glVertexAttribPointer(mTextureCoordsHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, vertexStride, mTextureVerticesBuffer);
+
+        // Drawing
+        GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, DRAW_ORDER.length, GLES20.GL_UNSIGNED_SHORT, mDrawListBuffer);
+        // GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
-        GLES20.glDisableVertexAttribArray(mTextureCoordHandle);
+        GLES20.glDisableVertexAttribArray(mTextureCoordsHandle);
     }
 
     private int loadShader(int type, String shaderCode) {
-
         int shader = GLES20.glCreateShader(type);
-
         GLES20.glShaderSource(shader, shaderCode);
         GLES20.glCompileShader(shader);
-
         return shader;
+    }
+
+    public void transformWorldCoords(View targetView, int viewPortWidth, int viewPortHeight) {
+
+        // 目标 View 在 ViewPort 的位置
+        int targetLeft = targetView.getLeft();
+        int targetTop = targetView.getTop() + targetView.getHeight();
+
+        float ratioLeft = targetLeft * 1.0f / viewPortWidth;
+        float ratioTop = targetTop * 1.0f / viewPortHeight;
+
+        // 根据拉伸比例还原顶点
+        float[] cube = new float[]{
+                WORLD_COORDS[0] * ratioLeft, WORLD_COORDS[1] * ratioTop,
+                WORLD_COORDS[2] * ratioLeft, WORLD_COORDS[3] * ratioTop,
+                WORLD_COORDS[4] * ratioLeft, WORLD_COORDS[5] * ratioTop,
+                WORLD_COORDS[6] * ratioLeft, WORLD_COORDS[7] * ratioTop,
+        };
+
+        mVertexBuffer.clear();
+        mVertexBuffer.put(cube).position(0);
+    }
+
+    private void printFloatArray(float[] array) {
+        StringBuilder builder = new StringBuilder();
+        for (float element : array) {
+            builder.append(element).append(",");
+        }
+        builder.deleteCharAt(builder.toString().length() - 1);
+        Log.d(TAG, "FloatArray - " + builder.toString());
     }
 }

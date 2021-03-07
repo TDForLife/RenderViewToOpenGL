@@ -4,15 +4,29 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.SurfaceTexture;
+import android.util.AttributeSet;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.ViewTreeObserver;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 public class GLLinearLayout extends LinearLayout implements IRenderView {
 
     private Surface mSurface;
+
+    public GLLinearLayout(Context context) {
+        super(context);
+        setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+        addOnPreDrawListener();
+    }
+
+    public GLLinearLayout(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public GLLinearLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
 
     @Override
     public void configSurface(Surface surface) {
@@ -22,12 +36,6 @@ public class GLLinearLayout extends LinearLayout implements IRenderView {
     @Override
     public void configSurfaceTexture(SurfaceTexture surfaceTexture) {
         mSurface = new Surface(surfaceTexture);
-    }
-
-    public GLLinearLayout(Context context) {
-        super(context);
-        setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-        addOnPreDrawListener();
     }
 
     private void addOnPreDrawListener() {
