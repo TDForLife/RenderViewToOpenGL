@@ -39,33 +39,33 @@ public class DirectDrawer {
     private final static int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per
 
     private final static float[] WORLD_COORDS = {
-            -1.0f, 1.0f,
-            -1.0f, -1.0f,
-            1.0f, -1f,
-            1.0f, 1.0f
+            -1.0f, -1.0f, // v1
+            1.0f, -1.0f,  // v2
+            -1.0f, 1.0f,  // v3
+            1.0f, 1.0f,   // v4
 
 //            -0.5f, 0.5f,
 //            -0.5f, -0.5f,
 //            0.5f, -0.5f,
-//            0.5f, 0.5f
+//            0.5f, 0.5f,
 
 //            -0.30555555f,0.026352288f,
 //            -0.30555555f,-0.026352288f,
 //            0.30555555f,-0.026352288f,
-//            0.30555555f,0.026352288f
+//            0.30555555f,0.026352288f,
     };
 
     private final static float[] TEXTURE_VERTICES = {
-            0f, 0f,
-            0f, 1f,
-            1f, 1f,
-            1f, 0f
+            0.0f, 1.0f, // v1
+            1.0f, 1.0f, // v2
+            0.0f, 0.0f, // v3
+            1.0f, 0.0f, // v4
     };
 
     // order to draw vertices
     private final short[] DRAW_ORDER = {
-            0, 1, 2,
-            0, 3, 2
+            0, 1, 3,
+            0, 2, 3
     };
 
 
