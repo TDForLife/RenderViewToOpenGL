@@ -35,11 +35,6 @@ public class GLProgressBar extends ProgressBar implements IRenderView {
 	}
 
 	@Override
-	public void configSurfaceTexture(SurfaceTexture surfaceTexture) {
-		mSurface = new Surface(surfaceTexture);
-	}
-
-	@Override
 	protected void onDraw(Canvas canvas) {
 		if (mSurface != null) {
 			// Requires a try/catch for .lockCanvas( null )
@@ -53,8 +48,8 @@ public class GLProgressBar extends ProgressBar implements IRenderView {
 				// targetting the canvas
 				mSurface.unlockCanvasAndPost(surfaceCanvas); // We're done with
 				// the canvas!
-			} catch (OutOfResourcesException excp) {
-				excp.printStackTrace();
+			} catch (OutOfResourcesException exception) {
+				exception.printStackTrace();
 			}
 		}
 

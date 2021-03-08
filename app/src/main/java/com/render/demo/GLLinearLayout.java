@@ -33,11 +33,6 @@ public class GLLinearLayout extends LinearLayout implements IRenderView {
         this.mSurface = surface;
     }
 
-    @Override
-    public void configSurfaceTexture(SurfaceTexture surfaceTexture) {
-        mSurface = new Surface(surfaceTexture);
-    }
-
     private void addOnPreDrawListener() {
         final ViewTreeObserver mObserver = getViewTreeObserver();
         if (mObserver != null) {
@@ -64,8 +59,8 @@ public class GLLinearLayout extends LinearLayout implements IRenderView {
                 mSurface.unlockCanvasAndPost(surfaceCanvas);
             }
             invalidate();
-        } catch (OutOfResourcesException e) {
-            e.printStackTrace();
+        } catch (OutOfResourcesException exception) {
+            exception.printStackTrace();
         }
     }
 

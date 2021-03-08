@@ -21,7 +21,7 @@ class ViewRenderer implements GLSurfaceView.Renderer {
 
     private Context context;
     private IRenderView mRenderView;
-    private int glSurfaceTex;
+    private int glOuterSurfaceTextureID;
     private SurfaceTexture surfaceTexture = null;
     private DirectDrawer mDirectDrawer;
 
@@ -53,14 +53,13 @@ class ViewRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         surfaceTexture = null;
-        glSurfaceTex = engineCreateSurfaceTexture(textureWidth, textureHeight);
-        if (glSurfaceTex > 0) {
-            surfaceTexture = new SurfaceTexture(glSurfaceTex);
+        glOuterSurfaceTextureID = engineCreateGLOuterSurfaceTexture(textureWidth, textureHeight);
+        if (glOuterSurfaceTextureID > 0) {
+            surfaceTexture = new SurfaceTexture(glOuterSurfaceTextureID);
             surfaceTexture.setDefaultBufferSize(textureWidth, textureHeight);
             Surface surface = new Surface(surfaceTexture);
             mRenderView.configSurface(surface);
-            mRenderView.configSurfaceTexture(surfaceTexture);
-            mDirectDrawer = new DirectDrawer(glSurfaceTex);
+            mDirectDrawer = new DirectDrawer(glOuterSurfaceTextureID, textureWidth, textureHeight);
         }
     }
 
@@ -69,15 +68,15 @@ class ViewRenderer implements GLSurfaceView.Renderer {
      * Create our texture. This has to be done each time the surface is
      * created.
      */
-    int engineCreateSurfaceTexture(int width, int height) {
+    int engineCreateGLOuterSurfaceTexture(int width, int height) {
 
         int[] textures = new int[1];
         GLES20.glGenTextures(1, textures, 0);
 
-        glSurfaceTex = textures[0];
+        glOuterSurfaceTextureID = textures[0];
 
-        if (glSurfaceTex > 0) {
-            GLES20.glBindTexture(GL_TEXTURE_EXTERNAL_OES, glSurfaceTex);
+        if (glOuterSurfaceTextureID > 0) {
+            GLES20.glBindTexture(GL_TEXTURE_EXTERNAL_OES, glOuterSurfaceTextureID);
 
             // Notice the use of GL_TEXTURE_2D for texture creation
             GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB, width, height, 0,
@@ -88,7 +87,7 @@ class ViewRenderer implements GLSurfaceView.Renderer {
             GLES20.glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
             GLES20.glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
         }
-        return glSurfaceTex;
+        return glOuterSurfaceTextureID;
     }
 
     @Override

@@ -18,7 +18,9 @@ public class DirectDrawer {
             + "attribute vec4 vPosition;\n"
             + "attribute vec2 inputTextureCoordinate;\n"
             + "varying vec2 textureCoordinate;\n"
+            + "uniform mat4 uMVPMatrix;\n"
             + "void main()" + "{\n"
+//            + "     gl_Position = uMVPMatrix * vPosition;\n"
             + "     gl_Position = vPosition;\n"
             + "     textureCoordinate = inputTextureCoordinate;\n"
             + "}";
@@ -36,12 +38,12 @@ public class DirectDrawer {
     private final static int COORDS_PER_VERTEX = 2;
     private final static int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per
 
-//    private final static float[] WORLD_COORDS = {
-//            -1.0f, 1.0f,
-//            -1.0f, -1.0f,
-//            1.0f, -1f,
-//            1.0f, 1.0f
-//    };
+    private final static float[] WORLD_COORDS = {
+            -1.0f, 1.0f,
+            -1.0f, -1.0f,
+            1.0f, -1f,
+            1.0f, 1.0f
+    };
 
 //    private final static float[] WORLD_COORDS = {
 //            -0.30555555f,0.026352288f,
@@ -50,12 +52,12 @@ public class DirectDrawer {
 //            0.30555555f,0.026352288f
 //    };
 
-    private final static float[] WORLD_COORDS = {
-            -0.5f, 0.5f,
-            -0.5f, -0.5f,
-            0.5f, -0.5f,
-            0.5f, 0.5f
-    };
+//    private final static float[] WORLD_COORDS = {
+//            -0.5f, 0.5f,
+//            -0.5f, -0.5f,
+//            0.5f, -0.5f,
+//            0.5f, 0.5f
+//    };
 
     private final static float[] TEXTURE_VERTICES = {
             0f, 0f,
@@ -77,10 +79,13 @@ public class DirectDrawer {
     private int mProgram;
 
     private int mPositionHandle;
+    private int mUniformPositionHandle;
     private int mTextureCoordsHandle;
     private int mTextureID;
 
-    public DirectDrawer(int texture) {
+    private final float[] mMVPMatrix = new float[16];
+
+    public DirectDrawer(int texture, int textureWidth, int textureHeight) {
 
         this.mTextureID = texture;
 
@@ -114,10 +119,18 @@ public class DirectDrawer {
         GLES20.glAttachShader(mProgram, fragmentShader);
         // shader to program
         GLES20.glLinkProgram(mProgram);
+
+        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+        mUniformPositionHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        mTextureCoordsHandle = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
+
+        // Matrix.perspectiveM(mMVPMatrix, 0, 45, (float) textureWidth / textureHeight, 0.1f, 100f);
+        // Matrix.translateM(mMVPMatrix, 0, 0.5f, 0.5f, -0.5f);
+        // Matrix.translateM(mMVPMatrix, 0, -0f, 0f, -0.1f);
+        // printFloatArray(mMVPMatrix);
     }
 
     public void draw(float[] mtx) {
-        Log.d("zwt", "draw - ");
 
         GLES20.glUseProgram(mProgram);
 
@@ -126,17 +139,16 @@ public class DirectDrawer {
 
         // get handle to vertex shader's vPosition member
         // Prepare the <insert shape here> coordinate data
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
         mVertexBuffer.position(0);
         GLES20.glEnableVertexAttribArray(mPositionHandle);
         GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, vertexStride, mVertexBuffer);
 
-        mTextureCoordsHandle = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
         mTextureVerticesBuffer.position(0);
         GLES20.glEnableVertexAttribArray(mTextureCoordsHandle);
         GLES20.glVertexAttribPointer(mTextureCoordsHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, vertexStride, mTextureVerticesBuffer);
 
         // Drawing
+        // GLES20.glUniformMatrix4fv(mUniformPositionHandle, 1, false, mMVPMatrix, 0);
         GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, DRAW_ORDER.length, GLES20.GL_UNSIGNED_SHORT, mDrawListBuffer);
         // GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 
