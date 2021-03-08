@@ -75,7 +75,7 @@ public class DirectDrawer {
     private int mProgram;
 
     private int mPositionHandle;
-    private int mUniformPositionHandle;
+    private int mPositionUniformHandle;
     private int mTextureCoordsHandle;
     private int mTextureID;
 
@@ -117,7 +117,7 @@ public class DirectDrawer {
         GLES20.glLinkProgram(mProgram);
 
         mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
-        mUniformPositionHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        mPositionUniformHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
         mTextureCoordsHandle = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
 
         // Matrix.perspectiveM(mMVPMatrix, 0, 45, (float) textureWidth / textureHeight, 0.1f, 100f);
