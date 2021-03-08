@@ -9,7 +9,6 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
@@ -20,7 +19,6 @@ public class GLActivity extends Activity {
 
     private FrameLayout mContainer;
     private GLSurfaceView mDrawSurfaceView;
-    private Display mDisplay;
     private Handler mHandler;
 
     @Override
@@ -29,7 +27,6 @@ public class GLActivity extends Activity {
         setContentView(R.layout.activity_main);
         mContainer = findViewById(R.id.container_layout);
         mDrawSurfaceView = findViewById(R.id.draw_surface_view);
-        mDisplay = getWindowManager().getDefaultDisplay();
         mHandler = new Handler();
 //        addTextView();
 //        addGLViewGroup();
@@ -39,7 +36,7 @@ public class GLActivity extends Activity {
 
     private void activeFixedTextView() {
         final GLTextView fixedTextView = findViewById(R.id.fixed_gl_tv);
-        final ViewRenderer renderer = new ViewRenderer(getApplicationContext(), fixedTextView, mDisplay);
+        final ViewRenderer renderer = new ViewRenderer(getApplicationContext(), fixedTextView);
 
         mDrawSurfaceView.setVisibility(View.VISIBLE);
         mDrawSurfaceView.setEGLContextClientVersion(2);
@@ -70,7 +67,7 @@ public class GLActivity extends Activity {
         glTextView.setText("Hello TextView");
         glTextView.setTextColor(Color.WHITE);
 
-        ViewRenderer renderer = new ViewRenderer(getApplicationContext(), glTextView, mDisplay);
+        ViewRenderer renderer = new ViewRenderer(getApplicationContext(), glTextView);
         mDrawSurfaceView.setVisibility(View.VISIBLE);
         mDrawSurfaceView.setEGLContextClientVersion(2);
         mDrawSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
@@ -101,7 +98,7 @@ public class GLActivity extends Activity {
         glLinearLayout.addView(glTextView);
 
         // Setup the surface view for drawing to
-        ViewRenderer renderer = new ViewRenderer(getApplicationContext(), glLinearLayout, mDisplay);
+        ViewRenderer renderer = new ViewRenderer(getApplicationContext(), glLinearLayout);
         final GLSurfaceView glSurfaceView = new GLSurfaceView(getApplicationContext());
         glSurfaceView.setEGLContextClientVersion(2);
         glSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
@@ -128,7 +125,7 @@ public class GLActivity extends Activity {
 
     private void addProgressView() {
         final GLProgressBar glProgressBar = new GLProgressBar(this);
-        ViewRenderer renderer = new ViewRenderer(getApplicationContext(), glProgressBar, mDisplay);
+        ViewRenderer renderer = new ViewRenderer(getApplicationContext(), glProgressBar);
         mDrawSurfaceView.setVisibility(View.VISIBLE);
         mDrawSurfaceView.setEGLContextClientVersion(2);
         mDrawSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);

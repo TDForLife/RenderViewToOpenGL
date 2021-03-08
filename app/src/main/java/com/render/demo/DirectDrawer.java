@@ -43,21 +43,17 @@ public class DirectDrawer {
             -1.0f, -1.0f,
             1.0f, -1f,
             1.0f, 1.0f
-    };
 
-//    private final static float[] WORLD_COORDS = {
-//            -0.30555555f,0.026352288f,
-//            -0.30555555f,-0.026352288f,
-//            0.30555555f,-0.026352288f,
-//            0.30555555f,0.026352288f
-//    };
-
-//    private final static float[] WORLD_COORDS = {
 //            -0.5f, 0.5f,
 //            -0.5f, -0.5f,
 //            0.5f, -0.5f,
 //            0.5f, 0.5f
-//    };
+
+//            -0.30555555f,0.026352288f,
+//            -0.30555555f,-0.026352288f,
+//            0.30555555f,-0.026352288f,
+//            0.30555555f,0.026352288f
+    };
 
     private final static float[] TEXTURE_VERTICES = {
             0f, 0f,
@@ -130,6 +126,16 @@ public class DirectDrawer {
         // printFloatArray(mMVPMatrix);
     }
 
+
+    /**
+     * mtx = {
+     *  1.0,0.0,0.0,0.0,
+     *  0.0,1.0,0.0,0.0,
+     *  0.0,0.0,1.0,0.0,
+     *  0.0,0.0,0.0,1.0
+     * }
+     * @param mtx
+     */
     public void draw(float[] mtx) {
 
         GLES20.glUseProgram(mProgram);

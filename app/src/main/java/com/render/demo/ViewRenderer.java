@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.view.Display;
 import android.view.Surface;
 import android.view.View;
 
@@ -15,27 +14,52 @@ class ViewRenderer implements GLSurfaceView.Renderer {
 
     private final int GL_TEXTURE_EXTERNAL_OES = 0x8D65;
 
-    // Fixed values
-    private int textureWidth;
-    private int textureHeight;
-
     private Context context;
     private IRenderView mRenderView;
     private int glOuterSurfaceTextureID;
     private SurfaceTexture surfaceTexture = null;
     private DirectDrawer mDirectDrawer;
 
-    public ViewRenderer(Context context, IRenderView mRenderView, Display mDisplay) {
+    // Fixed values
+    private int textureWidth;
+    private int textureHeight;
+
+    public ViewRenderer(Context context, IRenderView mRenderView) {
         this.context = context;
         this.mRenderView = mRenderView;
-        textureWidth = mDisplay.getWidth();
-        textureHeight = mDisplay.getHeight();
+    }
+
+    @Override
+    public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+    }
+
+    @Override
+    public void onSurfaceChanged(GL10 gl, int width, int height) {
+        textureWidth = width;
+        textureHeight = height;
         // textureWidth = 277;
         // textureHeight = 57;
+
+        if (surfaceTexture != null) {
+            surfaceTexture.release();
+            surfaceTexture = null;
+        }
+        glOuterSurfaceTextureID = engineCreateGLOuterSurfaceTexture(textureWidth, textureHeight);
+        if (glOuterSurfaceTextureID > 0) {
+            surfaceTexture = new SurfaceTexture(glOuterSurfaceTextureID);
+            surfaceTexture.setDefaultBufferSize(textureWidth, textureHeight);
+            Surface surface = new Surface(surfaceTexture);
+            mRenderView.configSurface(surface);
+            mDirectDrawer = new DirectDrawer(glOuterSurfaceTextureID, textureWidth, textureHeight);
+        }
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
+
+        if (surfaceTexture == null || mDirectDrawer == null) {
+            return;
+        }
 
         surfaceTexture.updateTexImage();
 
@@ -50,25 +74,11 @@ class ViewRenderer implements GLSurfaceView.Renderer {
         mDirectDrawer.draw(mtx);
     }
 
-    @Override
-    public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        surfaceTexture = null;
-        glOuterSurfaceTextureID = engineCreateGLOuterSurfaceTexture(textureWidth, textureHeight);
-        if (glOuterSurfaceTextureID > 0) {
-            surfaceTexture = new SurfaceTexture(glOuterSurfaceTextureID);
-            surfaceTexture.setDefaultBufferSize(textureWidth, textureHeight);
-            Surface surface = new Surface(surfaceTexture);
-            mRenderView.configSurface(surface);
-            mDirectDrawer = new DirectDrawer(glOuterSurfaceTextureID, textureWidth, textureHeight);
-        }
-    }
-
-
     /**
      * Create our texture. This has to be done each time the surface is
      * created.
      */
-    int engineCreateGLOuterSurfaceTexture(int width, int height) {
+    private int engineCreateGLOuterSurfaceTexture(int width, int height) {
 
         int[] textures = new int[1];
         GLES20.glGenTextures(1, textures, 0);
@@ -88,11 +98,6 @@ class ViewRenderer implements GLSurfaceView.Renderer {
             GLES20.glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
         }
         return glOuterSurfaceTextureID;
-    }
-
-    @Override
-    public void onSurfaceChanged(GL10 gl, int width, int height) {
-
     }
 
     public void transformWorldCoords(View targetView) {
