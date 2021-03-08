@@ -2,6 +2,7 @@ package com.render.demo;
 
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
+import android.opengl.Matrix;
 import android.util.Log;
 import android.view.View;
 
@@ -154,7 +155,7 @@ public class DirectDrawer {
         GLES20.glVertexAttribPointer(mTextureCoordsHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, vertexStride, mTextureVerticesBuffer);
 
         // Drawing
-        // GLES20.glUniformMatrix4fv(mUniformPositionHandle, 1, false, mMVPMatrix, 0);
+        // GLES20.glUniformMatrix4fv(mPositionUniformHandle, 1, false, mMVPMatrix, 0);
         GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, DRAW_ORDER.length, GLES20.GL_UNSIGNED_SHORT, mDrawListBuffer);
         // GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 
